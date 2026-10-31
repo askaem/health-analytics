@@ -1,0 +1,11 @@
+FROM python:3.12-slim-bookworm
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends poppler-utils \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+RUN pip install --no-cache-dir 'psycopg[binary]>=3.2,<4'
+COPY function_import.py /app/function_import.py
+RUN useradd -r -u 10001 appuser
+USER appuser
+ENTRYPOINT ["python", "/app/function_import.py"]

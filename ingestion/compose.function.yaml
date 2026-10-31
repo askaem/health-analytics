@@ -1,0 +1,22 @@
+# Overlay on the EXISTING PostgreSQL stack. Does not modify compose.yaml.
+services:
+  function-importer:
+    build:
+      context: ./ingestion
+      dockerfile: Dockerfile.function
+    image: health-function-importer:local
+    profiles: ["tools"]
+    restart: "no"
+    environment:
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGDATABASE: ${POSTGRES_DB}
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - /data/imports:/imports:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - health-net

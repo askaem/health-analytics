@@ -1,0 +1,22 @@
+# Overlay on your EXISTING compose.yaml. Do not replace the PostgreSQL service.
+# Commands use: docker compose -f compose.yaml -f compose.ingest.yaml run --rm importer ...
+services:
+  importer:
+    build:
+      context: ./ingestion
+    image: health-insidetracker-importer:local
+    profiles: ["tools"]
+    restart: "no"
+    environment:
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGDATABASE: ${POSTGRES_DB}
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - /data/imports:/imports:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - health-analytics-net
